@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, Details, Node } from 'cc';
+import { _decorator, CCFloat, Color, Component, Details, Label, math, Node, tween, Vec3 } from 'cc';
 import { BoardController } from './BoardController';
 import { Bot } from './Bot';
 import { PlayerController } from './PlayerController';
@@ -29,12 +29,20 @@ export class Match extends Component {
     })
     player: PlayerController = null;
 
+    @property({
+        type: Label
+    })
+    timeLabel: Label = null;
+
     //isFinisTurn: boolean = false;
     isPlayerTurn: boolean = true;
     isUpdate: boolean = true;
 
+    DURATION = 0.1;
+
     private switchTurnCallBack: () => void;
-    private timeElapsed: number = 0;
+    private timeElapsed: number = this.timeToChangeTurn;
+    private curentTime: number = this.timeToChangeTurn;
 
     onLoad(){
         this.node.on('finishTurn', this.OnFinishTurn, this);
@@ -42,7 +50,7 @@ export class Match extends Component {
     }
 
     start() {
-        console.log(`1---playe turn: ${this.player.isPlaylerTurn}, bot turn: ${this.bot.isBotTurn}\n`)
+        console.log(`1---playe turn: ${this.player.isPlaylerTurn}, bot turn: ${this.bot.isBotTurn}\n`);
         this.RegisterOnFinishTurn();
         this.UpDateTurnForCell();
         this.schedule(this.switchTurnCallBack, this.timeToChangeTurn);
@@ -51,10 +59,11 @@ export class Match extends Component {
 
     update(deltaTime: number) {
         if(this.isUpdate){
-            this.timeElapsed += deltaTime;
+            this.timeElapsed -= deltaTime;
+            this.ShowTime();
         }
 
-        if(this.timeElapsed >= this.timeToChangeTurn){
+        if(this.timeElapsed <= 0){
             if(this.player.isPlaylerTurn === 1){
                 //console.log('in update');
                 UIUnits.loadPopUp("Prefabs/UI_Lose", (nodeLoading) => {
@@ -74,7 +83,7 @@ export class Match extends Component {
                     // }, 2000);
                 });
             }
-            this.timeElapsed = 0;
+            this.timeElapsed = this.timeToChangeTurn;
             this.unschedule(this.switchTurnCallBack);
             this.isUpdate = false;
         }
@@ -111,7 +120,8 @@ export class Match extends Component {
 
             this.bot.scheduleOnce(this.bot.BotPlayInTurn,1);
         }
-        this.timeElapsed = 0;
+        this.timeElapsed = this.timeToChangeTurn;
+        this.timeLabel.color  = new Color(0, 82, 20);
     }
 
     ResetSchdule(){
@@ -223,6 +233,31 @@ export class Match extends Component {
         return row >= 0 && row < this.Board.row && col >= 0 && col < this.Board.colum;
     }
 //#endregion
+
+    //show time
+    ShowTime(){
+        const time = Math.floor(this.timeElapsed);
+        if(time != this.curentTime && time>=0){
+            this.timeLabel.string = time.toString();
+            tween(this.timeLabel.node)
+                    .to(this.DURATION, {scale: new Vec3(1, 1, 1)}, {easing: 'backOut'})
+                    .start();
+
+            if(time<=5){
+                this.timeLabel.node.scale = new Vec3(0, 0, 0);
+                this.timeLabel.color  = new Color(255, 0, 0);
+                tween(this.timeLabel.node)
+                    .to(this.DURATION, {scale: new Vec3(1, 1, 1)}, {easing(k){
+                        var s = 3;
+                        return --k * k * ( ( s + 1 ) * k + s ) + 1;
+                    }})
+                    .start();
+            } 
+            this.curentTime = time;
+        }
+
+               
+    }
 }
 
 

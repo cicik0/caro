@@ -70,7 +70,24 @@ export class TestTounchScreen extends Component {
             this.node.setScale(newScale);
 
         }else if(!this.isPinching && event.getAllTouches().length === 1){
-            
+            const touch = event.getTouches()[0];
+            const delta = touch.getDelta();
+            const currentPosition = this.node.getPosition();
+            const newPosition = currentPosition.add(new Vec3(delta.x, delta.y, 0));
+
+            const minX = -360;
+            const maxX = 360;
+            const minY = -360;
+            const maxY = 360;
+
+            let clampedX = Math.min(Math.max(newPosition.x, minX), maxX);
+            let clampedY = Math.min(Math.max(newPosition.y, minY), maxY);
+            if(this.node.scale.x >1 && this.node.scale.y > 1){
+                this.node.setPosition(clampedX, clampedY);
+            }
+            else{
+                this.node.setPosition(0, 0, 0);
+            }
         }
     }
 

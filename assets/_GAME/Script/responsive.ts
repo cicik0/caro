@@ -18,6 +18,7 @@ export class responsive extends Component {
         let deviceRatio =
             deviceResolution.canvasSize.width /
             deviceResolution.canvasSize.height;
+            
         if (deviceRatio < designRatio) {
             this.node.getComponent(UITransform).contentSize = size(
                 canvas.width,

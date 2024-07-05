@@ -130,29 +130,29 @@ export class Bot extends Component {
 
             if(count >= 5){
                 //win
-                cellScore += (cellType === this.botCellType) ? 2000: 3000;
+                cellScore += (cellType === this.botCellType) ? 6000: 5000;
             }else if(count === 4){
                 switch(openEnds){
                     case 1: 
-                        cellScore += (cellType === this.botCellType) ? 1000: 1500;
+                        cellScore += (cellType === this.botCellType) ? 2500: 2000;
                         break;
                     case 2: 
-                        cellScore += (cellType === this.botCellType) ? 500: 1000;
+                        cellScore += (cellType === this.botCellType) ? 4000: 3000;
                         break;
                 }               
             }else if(count === 3){
                 switch(openEnds){
                     case 2: 
-                        cellScore += (cellType === this.botCellType) ? 100: 500;
+                        cellScore += (cellType === this.botCellType) ? 500: 100;
                         break;
                     case 1: 
-                        cellScore += (cellType === this.botCellType) ? 10: 300;
+                        cellScore += (cellType === this.botCellType) ? 400: 50;
                         break;
                 } 
             }else if(count === 2 && openEnds > 0){
-                cellScore += (cellType === this.botCellType) ? 2: 50    ;
+                cellScore += (cellType === this.botCellType) ? 20: 2;
             }else if(count === 1 && openEnds > 0){
-                cellScore += (cellType === this.botCellType) ? 1 : 20;
+                cellScore += (cellType === this.botCellType) ? 10 : 1;
             }
         }
         //console.log('cellScore: ', cellScore);
@@ -176,14 +176,23 @@ export class Bot extends Component {
 
     //when end combo is a null cell?
     IsEndOpen(row: number, col: number, rowOffset: number, colOffset: number, cellType: string): number{
+        let openEnd = 0;
         let r = row + rowOffset;
         let c = col + colOffset;
 
-        if(this.IsValidCell(r, c) && this.board.boardArray[r][c].getComponent(Cell).currentType === cellType){
-            return 1;
+        while(this.IsValidCell(r,c)){
+            const cell = this.board.boardArray[r][c].getComponent(Cell);
+            if (cell.currentType === null) {
+                openEnd++;
+                break;
+            } else if (cell.currentType !== cellType) {
+                break;
+            }
+            r += rowOffset;
+            c += colOffset;
         }
 
-        return 0;
+        return openEnd;
     }
 
     //check cell in board
